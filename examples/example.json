@@ -1,0 +1,56 @@
+{
+	"name": "John Doe",
+	"age": 39,
+	"height": 1.81,
+	"subscribed": true,
+	"member": false,
+	"ignored": {
+		"number1": 1,
+		"number2": 2.3,
+		"boolean": true
+	},
+	"address": {
+		"city": "Paris",
+		"street": "Champs Elysées",
+		"number": 999
+	},
+	"friends": [
+		{
+			"name": "Jane Doe",
+			"age": 29,
+			"height": 2.0,
+			"subscribed": false,
+			"member": false,
+			"nicknames": ["Mrs Doe", "unknown-girl"],
+			"address": null
+		},
+		{
+			"name": "Mad Max",
+			"age": -1,
+			"height": 1.9,
+			"subscribed": true,
+			"member": true,
+			"address": {
+				"city": "The desert",
+				"street": "That dune",
+				"number": 0
+			},
+			"favoriteFood": ["sand"],
+			"favoritePlaces": null
+		}
+	],
+	"favoriteNumbers": [
+		1, 2, 3, 4, 4
+	],
+	"nicknames": [
+		"unknown",
+		"foo",
+		"bar"
+	],
+	"favoriteFood": [],
+	"favoritePlaces": [
+		[123.456, 0.00001],
+		[1.9999, 99999.01],
+		[0.0, 12.0]
+	]
+}
