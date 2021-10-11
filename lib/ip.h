@@ -10,8 +10,8 @@ typedef struct ipv4_range ipv4_range;
 typedef union ipv4_bytes  ipv4_bytes;
 
 external ipv4_range ipv4_parse_range(const c8 *s);
-external ipv4 ipv4_min_in_range(ipv4_range range);
-external ipv4 ipv4_max_in_range(ipv4_range range);
+external ipv4       ipv4_min_in_range(ipv4_range range);
+external ipv4       ipv4_max_in_range(ipv4_range range);
 external ipv4_bytes ipv4_to_bytes(ipv4 address);
 
 
