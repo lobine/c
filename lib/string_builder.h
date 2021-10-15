@@ -19,16 +19,13 @@ typedef struct string_buffer string_buffer;
 typedef struct string_builder string_builder;
 
 
-external s32 string_length(c8 *str);
-external b32 string_equal (c8 *s1, c8 *s2);
-
 external string_builder* string_make_builder(void);
 external void            string_free_builder(string_builder *builder);
 external s32             string_write_n     (string_builder *builder, c8 *str, s32 n);
 external s32             string_write       (string_builder *builder, c8 *str);
 external s32             string_write_char  (string_builder *builder, c8 c);
 external void            string_copy_builder(string_builder *builder, c8 *dst);
-external c8*             string_builder_to_c(string_builder *builder);
+external string          string_builder_to_string(string_builder *builder);
 
 
 //
@@ -42,33 +39,15 @@ struct string_buffer {
 };
 
 struct string_builder {
-    s32           len;
+    s32           total_length;
     string_buffer buffer;
     string_buffer *current;
 };
 
 
-s32 string_length(c8 *s) {
-    s32 len = 0;
-    while(s[len] != 0) len++;
-    return len;
-}
-
-b32 string_equal(c8 *s1, c8 *s2) {
-    s32 l1 = string_length(s1);
-    s32 l2 = string_length(s2);
-    if (l1 != l2) {
-        return false;
-    }
-    for (s32 i = 0; i < l1; i++) {
-        if (s1[i] != s2[i]) return false;
-    }
-    return true;
-}
-
 string_builder* string_make_builder(void) {
     string_builder *builder = struct_alloc(string_builder);
-    builder->len             = 0;
+    builder->total_length    = 0;
     builder->buffer.next     = NULL;
     builder->current         = NULL;
     return builder;
@@ -90,7 +69,7 @@ s32 string_write_n(string_builder *builder, c8 *src, s32 n) {
         buffer = &builder->buffer;
     }
 
-    s32 global_cursor = builder->len;
+    s32 global_cursor = builder->total_length;
     s32 buffer_cursor;
     s32 total_written_len = 0;
     s32 write_len;
@@ -122,13 +101,18 @@ s32 string_write_n(string_builder *builder, c8 *src, s32 n) {
 
     assert(total_written_len == n);
 
-    builder->len = global_cursor;
+    builder->total_length = global_cursor;
     return total_written_len;
 }
 
 s32 string_write(string_builder *builder, c8 *str) {
-    s32 len = string_length(str);
-    return string_write_n(builder, str, len);
+    s32 length = 0;
+    while(str[length++] != 0);
+    return string_write_n(builder, str, length - 1);
+}
+
+s32 string_write_string(string_builder *builder, string s) {
+    return string_write_n(builder, s.data, s.length);
 }
 
 s32 string_write_char(string_builder *builder, c8 c) {
@@ -137,7 +121,7 @@ s32 string_write_char(string_builder *builder, c8 c) {
         buffer = &builder->buffer;
     }
 
-    s32 global_cursor = builder->len;
+    s32 global_cursor = builder->total_length;
     s32 buffer_cursor = global_cursor % X_STRING_BUFFER_SIZE;
     if (buffer_cursor == 0 && global_cursor > 0) {
         /*
@@ -152,14 +136,14 @@ s32 string_write_char(string_builder *builder, c8 c) {
     }
 
     buffer->data[buffer_cursor] = c;
-    builder->len += 1;
+    builder->total_length += 1;
     return 1;
 }
 
 void string_copy_builder(string_builder *builder, c8 *dst) {
     string_buffer *buffer = &builder->buffer;
     s32 write_index = 0, write_len;
-    s32 to_write = builder->len;
+    s32 to_write = builder->total_length;
 
     while (to_write > 0) {
         assert(buffer != NULL);
@@ -175,14 +159,15 @@ void string_copy_builder(string_builder *builder, c8 *dst) {
 
         buffer = buffer->next;
     }
-
-    dst[write_index] = 0;
 }
 
-c8* string_builder_to_c(string_builder *builder) {
-    c8 *string = array_alloc(builder->len + 1, c8);
-    string_copy_builder(builder, string);
-    return string;
+string string_builder_to_string(string_builder *builder) {
+    c8 *c_str = array_alloc(builder->total_length, c8);
+    string_copy_builder(builder, c_str);
+    return (string){
+        .length = builder->total_length,
+        .data   = c_str,
+    };
 }
 
 #endif // __robin_c_string_builder
